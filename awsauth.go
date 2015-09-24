@@ -37,7 +37,6 @@ func Sign(request *http.Request, credentials ...Credentials) *http.Request {
 }
 
 func Sign4WithMetaData(request *http.Request, service string, region string, credentials ...Credentials) *http.Request {
-
 	keys := chooseKeys(credentials)
 	// Add the X-Amz-Security-Token header when using STS
 	if keys.SecurityToken != "" {
@@ -46,11 +45,12 @@ func Sign4WithMetaData(request *http.Request, service string, region string, cre
 
 	prepareRequestV4(request)
 	meta := new(metadata)
+
 	// Task 1
 	hashedCanonReq := hashedCanonicalRequestV4(request, meta)
 
 	// Task 2
-	stringToSign := stringToSignV4(request, hashedCanonReq, meta, service, region)
+	stringToSign := stringToSignV4(request, hashedCanonReq, meta)
 
 	// Task 3
 	signingKey := signingKeyV4(keys.SecretAccessKey, meta.date, meta.region, meta.service)
@@ -63,6 +63,7 @@ func Sign4WithMetaData(request *http.Request, service string, region string, cre
 
 // Sign4 signs a request with Signed Signature Version 4.
 func Sign4(request *http.Request, credentials ...Credentials) *http.Request {
+
 	return Sign4WithMetaData(request, "", "", credentials...)
 }
 

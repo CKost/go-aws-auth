@@ -41,17 +41,12 @@ func hashedCanonicalRequestV4(request *http.Request, meta *metadata) string {
 	return hashSHA256([]byte(canonicalRequest))
 }
 
-func stringToSignV4(request *http.Request, hashedCanonReq string, meta *metadata, service string, region string) string {
+func stringToSignV4(request *http.Request, hashedCanonReq string, meta *metadata) string {
 	// TASK 2. http://docs.aws.amazon.com/general/latest/gr/sigv4-create-string-to-sign.html
-
 	requestTs := request.Header.Get("X-Amz-Date")
-
 	meta.algorithm = "AWS4-HMAC-SHA256"
-	//If user passed specific service/region vars in, use those, else, use the ServiceAndRegion method to get them
-	if service != "" && region != "" {
-		meta.service = service
-		meta.region = region
-	} else {
+
+	if meta.service == "" || meta.region == "" {
 		meta.service, meta.region = serviceAndRegion(request.Host)
 	}
 
