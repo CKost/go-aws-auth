@@ -63,7 +63,6 @@ func stringToSignV4(request *http.Request, hashedCanonReq string, meta *metadata
 
 func signatureV4(signingKey []byte, stringToSign string) string {
 	// TASK 3. http://docs.aws.amazon.com/general/latest/gr/sigv4-calculate-signature.html
-
 	return hex.EncodeToString(hmacSHA256(signingKey, stringToSign))
 }
 
