@@ -50,7 +50,7 @@ func Sign4WithMetaData(request *http.Request, service string, region string, cre
 	hashedCanonReq := hashedCanonicalRequestV4(request, meta)
 
 	// Task 2
-	stringToSign := stringToSignV4(request, hashedCanonReq, meta)
+	stringToSign := stringToSignV4(request, hashedCanonReq, meta, service, region)
 
 	// Task 3
 	signingKey := signingKeyV4(keys.SecretAccessKey, meta.date, meta.region, meta.service)
