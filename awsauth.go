@@ -29,42 +29,41 @@ func Sign(request *http.Request, credentials ...Credentials) *http.Request {
 	case 3:
 		return Sign3(request, credentials...)
 	case 4:
-		//Can't specify a service & region with the Sign() function, so will pass empty params
-		//which will default them to the values parsed from the URL
-		return Sign4(request, "", "", credentials...)
+		return Sign4(request, credentials...)
 	case -1:
 		return SignS3(request, credentials...)
 	}
-
 	return nil
 }
 
-// Sign4 signs a request with Signed Signature Version 4.
-func Sign4(request *http.Request, service string, region string, credentials ...Credentials) *http.Request {
-	keys := chooseKeys(credentials)
+func Sign4WithMetaData(request *http.Request, meta *metadata, credentials []Credentials) *http.Request {
 
+	keys := chooseKeys(credentials)
 	// Add the X-Amz-Security-Token header when using STS
 	if keys.SecurityToken != "" {
 		request.Header.Set("X-Amz-Security-Token", keys.SecurityToken)
 	}
 
 	prepareRequestV4(request)
-	meta := new(metadata)
 
 	// Task 1
 	hashedCanonReq := hashedCanonicalRequestV4(request, meta)
 
 	// Task 2
-	stringToSign := stringToSignV4(request, hashedCanonReq, meta, service, region)
+	stringToSign := stringToSignV4(request, hashedCanonReq, meta)
 
 	// Task 3
-
 	signingKey := signingKeyV4(keys.SecretAccessKey, meta.date, meta.region, meta.service)
 	signature := signatureV4(signingKey, stringToSign)
 
 	request.Header.Set("Authorization", buildAuthHeaderV4(signature, meta, keys))
 	return request
 
+}
+
+// Sign4 signs a request with Signed Signature Version 4.
+func Sign4(request *http.Request, credentials ...Credentials) *http.Request {
+	return Sign4WithMetaData(request, new(metadata), credentials)
 }
 
 // Sign3 signs a request with Signed Signature Version 3.
